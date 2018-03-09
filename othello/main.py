@@ -63,19 +63,24 @@ def calc(board: list, boardSize: int, my: str = "b", isOthello = True):
             if count < 1: # どれもひっくりかえせなかったのでこれはだめ
                 continue
             # ここからcountを優先度として、石を置く場所によって優先度に手を加える
+            count *= 10 # 取れる数を尊重
             if (x == 0 or x == (boardSize-1)) and (y == 0 or y == (boardSize - 1)):
-                # 四隅は優先度+10
-                count += 10
+                # 四隅は優先度+100
+                count += 100
             elif ((y == 1  or y == boardSize-2) and (x < 2 or x >= boardSize-2)) or ((x == 1 or x == boardSize-2) and (y == 0 or y == boardSize-1)):
-                # 四隅の隣は優先度-5
-                count -= 5
+                # 四隅の隣は優先度-50
+                count -= 50
             elif (x == 0) or (x == boardSize-1) or (y == 0) or (y == boardSize-1):
-                # はしっこってなんか強そうなので優先度+2
-                count += 2
+                # はしっこってなんか強そうなので優先度+3
+                count += 3
+            else:
+                # 真ん中のほうによってほしいので真ん中のほうが優先度が高いようにする
+                count += int((abs((boardSize/2) - x) + abs((boardSize/2) - y)) / 2)
             # 最後に、今計算した優先度が今まで計算した中で一番大きかったやつより大きかったら(ロセオの場合は逆)そいつを最強の手扱いにする
             if addCount < count if isOthello else addCount > count:
                 pos = p
                 addCount = count
+    print(addCount)
     return pos # 最強の手の場所を返す
 
 def newGame(game: dict):
