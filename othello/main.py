@@ -49,9 +49,9 @@ def turn(board: list, boardSize: int, pos: int, my: str = "b"):
                     break
     return board
 
-def calc(board: list, boardSize: int, my: str = "b"):
+def calc(board: list, boardSize: int, my: str = "b", isOthello = True):
     pos = -1
-    addCount = -114514
+    addCount = -114514 if isOthello else 114514
     nowCount = len(list(filter(lambda x:x == my, board)))
     for x in range(boardSize):
         for y in range(boardSize):
@@ -63,7 +63,7 @@ def calc(board: list, boardSize: int, my: str = "b"):
                 continue
             if (x == 0 or x == (boardSize-1)) and (y == 0 or y == (boardSize - 1)):
                 count += 10
-            if addCount < count:
+            if addCount < count if isOthello else addCount > count:
                 pos = p
                 addCount = count
     return pos
@@ -100,8 +100,11 @@ def newGame(game: dict):
     for i in range(0, len(board), boardSize):
         a.append("".join(board[i:boardSize + i]))
     print("\n".join(a))
+
+    isOthello = not game["settings"]["is_llotheo"]
+
     if nowturn == myturn:
-        p = calc(board, boardSize, myturn)
+        p = calc(board, boardSize, myturn, isOthello)
         if p >= 0:
             stream.send(json.dumps({"type": "set", "pos": p}))
     while True:
@@ -110,10 +113,10 @@ def newGame(game: dict):
             body = r["body"]
             board = turn(board, boardSize, body["pos"], body["color"][0])
             nowturn = rival[body["color"][0]]
-            if calc(board, boardSize, nowturn) == -1:
+            if calc(board, boardSize, nowturn, isOthello) == -1:
                 nowturn = rival[nowturn]
             if nowturn == myturn:
-                p = calc(board, boardSize, myturn)
+                p = calc(board, boardSize, myturn, isOthello)
                 if p >= 0:
                     stream.send(json.dumps({"type": "set", "pos": p}))
 
