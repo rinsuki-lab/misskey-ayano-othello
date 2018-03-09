@@ -50,23 +50,33 @@ def turn(board: list, boardSize: int, pos: int, my: str = "b"):
     return board
 
 def calc(board: list, boardSize: int, my: str = "b", isOthello = True):
-    pos = -1
-    addCount = -114514 if isOthello else 114514
-    nowCount = len(list(filter(lambda x:x == my, board)))
+    pos = -1 # 最強の手の初期値 -1の場合は置ける場所がない(=パス)を表す
+    addCount = -114514 if isOthello else 114514 # 最強の手の初期値 この後の処理で導き出されるどの優先度よりも小さい/大きい必要がある(そうでないと置ける場所があるのにパスしてしまう)
+    nowCount = len(list(filter(lambda x:x == my, board))) # 現時点で自分が置けている石の数
     for x in range(boardSize):
         for y in range(boardSize):
             p = x + (y * boardSize)
-            if board[p] != "-":
+            if board[p] != "-": # 空き地以外には置かない
                 continue
             count = len(list(filter(lambda x:x == my, turn(board, boardSize, p, my)))) - nowCount - 1
-            if count < 1: # 取れなかったのでこれはだめ
+            # この時点でcountにはひっくりかえせる石の数が入っている
+            if count < 1: # どれもひっくりかえせなかったのでこれはだめ
                 continue
+            # ここからcountを優先度として、石を置く場所によって優先度に手を加える
             if (x == 0 or x == (boardSize-1)) and (y == 0 or y == (boardSize - 1)):
+                # 四隅は優先度+10
                 count += 10
+            elif ((y == 1  or y == boardSize-2) and (x < 2 or x >= boardSize-2)) or ((x == 1 or x == boardSize-2) and (y == 0 or y == boardSize-1)):
+                # 四隅の隣は優先度-5
+                count -= 5
+            elif (x == 0) or (x == boardSize-1) or (y == 0) or (y == boardSize-1):
+                # はしっこってなんか強そうなので優先度+2
+                count += 2
+            # 最後に、今計算した優先度が今まで計算した中で一番大きかったやつより大きかったら(ロセオの場合は逆)そいつを最強の手扱いにする
             if addCount < count if isOthello else addCount > count:
                 pos = p
                 addCount = count
-    return pos
+    return pos # 最強の手の場所を返す
 
 def newGame(game: dict):
     stream = client.stream("othello-game", {"game": game["id"]})
