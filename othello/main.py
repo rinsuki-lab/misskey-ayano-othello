@@ -80,16 +80,16 @@ def calc(board: list, my: str = "b", isOthello = True):
             count *= 10 # 取れる数を尊重
             if (x == 0 or x == (boardWidth-1)) and (y == 0 or y == (boardHeight - 1)):
                 # 四隅は優先度+100
-                count += 100
+                count += 1000
             elif ((y == 1  or y == boardHeight-2) and (x < 2 or x >= boardWidth-2)) or ((x == 1 or x == boardWidth-2) and (y == 0 or y == boardHeight-1)):
-                # 四隅の隣は優先度-50
-                count -= 50
-            elif (x == 0) or (x == boardWidth-1) or (y == 0) or (y == boardHeight-1):
-                # はしっこってなんか強そうなので優先度+3
-                count += 3
+                # 四隅の隣は優先度-500
+                count -= 500
+            # elif (x == 0) or (x == boardWidth-1) or (y == 0) or (y == boardHeight-1):
+            #     # はしっこってなんか強そうなので優先度+3
+            #     count += 3
             else:
                 # 真ん中のほうによってほしいので真ん中のほうが優先度が高いようにする
-                count += int((abs((boardWidth/2) - x) + abs((boardHeight/2) - y)) / 2)
+                count -= int((abs((boardWidth/2) - x) + abs((boardHeight/2) - y)))
             # 最後に、今計算した優先度が今まで計算した中で一番大きかったやつより大きかったら(ロセオの場合は逆)そいつを最強の手扱いにする
             if addCount < count if isOthello else addCount > count:
                 pos = p
@@ -118,8 +118,8 @@ def newGame(game: dict):
     nowturn = "b"
 
     for log in game["logs"]:
-        board = turn(board, log["pos"], log["color"][0])
-        nowturn = rival[log["color"][0]]
+        board = turn(board, log["pos"], "b" if log["color"] else "w")
+        nowturn = rival["b" if log["color"] else "w"]
     if calc(board, nowturn) == -1:
         print("nowturn skipped")
         nowturn = rival[nowturn]
@@ -139,8 +139,8 @@ def newGame(game: dict):
         r = json.loads(stream.recv())
         if r["type"] == "set":
             body = r["body"]
-            board = turn(board, body["pos"], body["color"][0])
-            nowturn = rival[body["color"][0]]
+            board = turn(board, body["pos"], "b" if log["color"] else "w")
+            nowturn = rival["b" if log["color"] else "w"]
             if calc(board, nowturn, isOthello) == -1:
                 nowturn = rival[nowturn]
             if nowturn == myturn:
