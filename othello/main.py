@@ -137,10 +137,11 @@ def newGame(game: dict):
             stream.send(json.dumps({"type": "set", "pos": p}))
     while True:
         r = json.loads(stream.recv())
+        print(r)
         if r["type"] == "set":
             body = r["body"]
-            board = turn(board, body["pos"], "b" if log["color"] else "w")
-            nowturn = rival["b" if log["color"] else "w"]
+            board = turn(board, body["pos"], "b" if body["color"] else "w")
+            nowturn = rival["b" if body["color"] else "w"]
             if calc(board, nowturn, isOthello) == -1:
                 nowturn = rival[nowturn]
             if nowturn == myturn:
